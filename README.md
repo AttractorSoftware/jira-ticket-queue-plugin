@@ -16,5 +16,5 @@ jira-ticket-queue-plugin
 
 * Добавляем в переменную среды
 
-`cat "export PATH=$PATH:/opt/atlassian-plugin-sdk-3.4/bin/" > ~./profile`
+`echo "export PATH=$PATH:/opt/atlassian-plugin-sdk-3.4/bin/" >> ~/.profile`
  
