@@ -360,6 +360,10 @@ public class DispositionManagerImpl implements DispositionManager {
         Collection<CustomField> fields = (issue == null) ?
                 customFieldManager.getCustomFieldObjects() : customFieldManager.getCustomFieldObjects(issue);
 
+        return findAnyCustomField(type, fields);
+    }
+
+    private CustomField findAnyCustomField(Class<?> type, Collection<CustomField> fields) {
         for (CustomField cf : fields) {
             if (type.isAssignableFrom(cf.getCustomFieldType().getClass())) {
                 return cf;
