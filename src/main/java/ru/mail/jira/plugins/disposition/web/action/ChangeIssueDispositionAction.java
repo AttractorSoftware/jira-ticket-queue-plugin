@@ -1,6 +1,7 @@
 package ru.mail.jira.plugins.disposition.web.action;
 
 import com.atlassian.jira.issue.fields.CustomField;
+import com.atlassian.jira.plugin.webfragment.model.JiraHelper;
 import com.atlassian.jira.web.action.issue.AbstractIssueSelectAction;
 import org.jetbrains.annotations.NotNull;
 import ru.mail.jira.plugins.disposition.customfields.IssueDispositionCF;

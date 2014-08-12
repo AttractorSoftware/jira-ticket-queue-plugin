@@ -27,10 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.mail.jira.plugins.disposition.customfields.IssueDispositionCF;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -197,7 +194,7 @@ public class DispositionManagerImpl implements DispositionManager {
     }
 
     @Override
-    public void setDisposition(@Nullable Issue high, @NotNull Issue dragged, @Nullable Issue low, @NotNull Collection<User> users, @NotNull Collection<String> errors, @Nullable Integer index) throws SearchException, JqlParseException {
+    public void setDisposition(@Nullable Issue high, @NotNull Issue dragged, @Nullable Issue low, @NotNull Collection<User> users, @NotNull Collection<String> errors, @Nullable Integer index, @Nullable String queueID) throws SearchException, JqlParseException {
 
         User currentUser = ComponentManager.getInstance().getJiraAuthenticationContext().getLoggedInUser();
 
@@ -205,7 +202,7 @@ public class DispositionManagerImpl implements DispositionManager {
 
         // assume, that all issues have the same custom field
         @Nullable
-        CustomField field = getCustomFieldByIssueAndType(IssueDispositionCF.class, dragged);
+        CustomField field = getCustomFieldByID(queueID);
         if (field == null) {
             errors.add(i18n.getText("ru.mail.jira.plugins.disposition.manager.error.custom.field.for.issue.not.found", dragged.getKey()));
             return;
@@ -369,6 +366,11 @@ public class DispositionManagerImpl implements DispositionManager {
             }
         }
         return null;
+    }
+
+    @Nullable
+    public CustomField getCustomFieldByID(@Nullable String queueID) {
+        return customFieldManager.getCustomFieldObject(queueID);
     }
 
     @Override
