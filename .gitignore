@@ -1,6 +1,6 @@
 *.class
 out
-.idea/**
+.idea
 *.iml
 target
 *.log
