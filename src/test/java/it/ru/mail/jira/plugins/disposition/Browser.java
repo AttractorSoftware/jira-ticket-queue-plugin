@@ -10,12 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class LocalDriver extends FirefoxDriver implements WebDriver{
+public class Browser extends FirefoxDriver implements WebDriver{
     private static final int QUEUE_START = 1;
     private static final int QUEUE_END = 10;
     private List<String> queue = new ArrayList<String>();
 
-    public LocalDriver(String url){
+    public Browser(String url){
         super();
         get(url);
     }
@@ -48,28 +48,27 @@ public class LocalDriver extends FirefoxDriver implements WebDriver{
         sortByQueueButton.click();
     }
 
-    public void resetLocalQueue(){
+    public void resetLocalQueue() {
         queue.clear();
         createLocalQueue();
     }
 
-    public void moveTicket(int fromPos, int toPos){
-        moveTicketInQueue(fromPos, toPos);
-        moveTicketLocally(fromPos, toPos);
+    public void moveIssue(int fromPos, int toPos){
+        moveIssueInQueue(fromPos, toPos);
+        moveIssueLocally(fromPos, toPos);
     }
 
     public boolean queueCorrect(){
         for(int i=QUEUE_START; i<=QUEUE_END; i++)
         {
-            if(getTicketIdByQueuePosition(i)!=queue.get(i-1)){
+            if(getTicketIdByQueuePosition(i).equals(queue.get(i-1))){
                 return false;
             }
-
         }
         return true;
     }
 
-    private void createLocalQueue(){
+    public void createLocalQueue(){
         String ticketId;
         for(int i=QUEUE_START; i<=QUEUE_END; i++)
         {
@@ -78,7 +77,7 @@ public class LocalDriver extends FirefoxDriver implements WebDriver{
         }
     }
 
-    private void moveTicketLocally(int fromPos, int toPos){
+    public void moveIssueLocally(int fromPos, int toPos){
         String movedTicketId = queue.get(fromPos-1);
         if(fromPos<toPos){
             for(int i=fromPos-1; i<toPos-1; i++)
@@ -96,7 +95,7 @@ public class LocalDriver extends FirefoxDriver implements WebDriver{
         queue.set(toPos-1, movedTicketId);
     }
 
-    private void moveTicketInQueue(int fromPos, int toPos){
+    public void moveIssueInQueue(int fromPos, int toPos){
         int yOffset = fromPos < toPos ? 5 : -5;
         WebElement fromRow = getRowByQueuePosition(fromPos);
         WebElement toRow = getRowByQueuePosition(toPos);
@@ -109,18 +108,50 @@ public class LocalDriver extends FirefoxDriver implements WebDriver{
                 .perform();
     }
 
-    private WebElement getRowByQueuePosition(int pos){
+    public WebElement getRowByQueuePosition(int pos){
         String xpath = String.format("//td[@class=\"nav customfield_10000\" and text()=%d]", pos);
         return waitForElement(xpath, 5);
     }
 
-    private String getTicketIdByQueuePosition(int pos){
+    public String getTicketIdByQueuePosition(int pos){
         String xpath = String.format("//tr[td/text()=%d]/td[@class=\"nav issuekey\"]", pos);
         return findElement(By.xpath(xpath)).getText();
     }
 
-    private WebElement waitForElement(String xpath, int timeoutSeconds){
+    public WebElement waitForElement(String xpath, int timeoutSeconds){
         manage().timeouts().implicitlyWait(timeoutSeconds, TimeUnit.SECONDS);
         return findElement(By.xpath(xpath));
+    }
+
+    public void removeIssuesAndField(){
+        clearIssues();
+        deleteQueueField();
+    }
+
+    public void clearIssues(){
+
+    }
+
+    public void createIssues(int count){
+    }
+
+    public void reindexIssues(){
+    }
+
+    public void addQueueField(){
+        //...
+        reindexIssues();
+    }
+
+    public void deleteQueueField(){
+
+    }
+
+    public boolean issuesEnumerationCorrect(){
+        return true;
+    }
+
+    public void closeFewIssues() {
+
     }
 }

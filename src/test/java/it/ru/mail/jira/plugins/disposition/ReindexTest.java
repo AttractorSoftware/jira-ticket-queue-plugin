@@ -1,10 +1,12 @@
 package it.ru.mail.jira.plugins.disposition;
 
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-public class QueueTest {
+public class ReindexTest {
     private static final String CI_URL="http://192.168.0.210:2990/jira/secure/Dashboard.jspa";
     private static final String LOCAL_URL="http://localhost:2990/jira/secure/Dashboard.jspa";
 
@@ -23,21 +25,19 @@ public class QueueTest {
     }
 
     @Test
-    public void testMoveIssueUp() throws InterruptedException {
-        moveIssue(10, 1);
+    public void testReindexOldIssues(){
+        browser.removeIssuesAndField();
+        browser.createIssues(10);
+        browser.addQueueField();
+        assertTrue(browser.issuesEnumerationCorrect());
     }
 
     @Test
-     public void testMoveIssueDown() throws InterruptedException {
-        moveIssue(2, 7);
-    }
-
-    private void moveIssue(int fromPos, int toPos) throws InterruptedException {
-        browser.openIssuesList();
-        browser.resetLocalQueue();
-        browser.moveIssue(fromPos, toPos);
-        //Wait for page to refresh
-        Thread.sleep(1000);
-        assertTrue(browser.queueCorrect());
+    public void testClosedIssuesDoNotGetNumber(){
+        browser.removeIssuesAndField();
+        browser.createIssues(10);
+        browser.closeFewIssues();
+        browser.addQueueField();
+        assertTrue(browser.issuesEnumerationCorrect());
     }
 }
