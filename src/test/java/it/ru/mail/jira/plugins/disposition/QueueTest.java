@@ -5,10 +5,7 @@ import org.junit.*;
 import static org.junit.Assert.assertTrue;
 
 public class QueueTest {
-    private static final String CI_URL="http://192.168.0.210:2990/jira/secure/Dashboard.jspa";
-    private static final String LOCAL_URL="http://localhost:2990/jira/secure/Dashboard.jspa";
-
-    private static Browser browser = new Browser(LOCAL_URL);
+    private static Browser browser = new Browser();
 
     @BeforeClass
     public static void LogIn(){
@@ -28,7 +25,7 @@ public class QueueTest {
     }
 
     @Test
-     public void testMoveIssueDown() throws InterruptedException {
+    public void testMoveIssueDown() throws InterruptedException {
         moveIssue(2, 7);
     }
 
@@ -39,5 +36,27 @@ public class QueueTest {
         //Wait for page to refresh
         Thread.sleep(1000);
         assertTrue(browser.queueCorrect());
+    }
+
+    @Test
+    public void testReindexOldIssues(){
+        browser.removeIssuesAndField();
+        browser.createIssues(10);
+        browser.addQueueField();
+        assertTrue(browser.issuesEnumerationCorrect());
+    }
+
+    @Test
+    public void testClosedIssuesDoNotGetNumber(){
+        browser.removeIssuesAndField();
+        browser.createIssues(10);
+        browser.closeFewIssues();
+        browser.addQueueField();
+        assertTrue(browser.issuesEnumerationCorrect());
+    }
+
+    @Test
+    public void testCreateIssueWithExistingNumber(){
+
     }
 }

@@ -11,40 +11,51 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class Browser extends FirefoxDriver implements WebDriver{
+    public static final String CI_URL="http://192.168.0.210:2990/jira/secure/Dashboard.jspa";
+    public static final String LOCAL_URL="http://localhost:2990/jira/secure/Dashboard.jspa";
+
     private static final int QUEUE_START = 1;
     private static final int QUEUE_END = 10;
     private List<String> queue = new ArrayList<String>();
+    private String homeUrl;
+
+    public Browser(){
+        super();
+        homeUrl = LOCAL_URL;
+        get(homeUrl);
+    }
 
     public Browser(String url){
         super();
-        get(url);
+        homeUrl = url;
+        get(homeUrl);
     }
 
     public void loginWithUsernameAndPassword(String username, String password){
-        WebElement frame = findElement(By.xpath("//iframe[@id=\"gadget-0\"]"));
+        WebElement frame = findElement(By.xpath(Elements.loginFrame));
         switchTo().frame(frame);
-        WebElement login_field = findElement(By.xpath("//input[@id=\"login-form-username\"]"));
-        WebElement password_field = findElement(By.xpath("//input[@id=\"login-form-password\"]"));
-        WebElement login_button = findElement(By.xpath("//input[@id=\"login\"]"));
+        WebElement login_field = findElement(By.xpath(Elements.loginField));
+        WebElement password_field = findElement(By.xpath(Elements.passwordField));
+        WebElement login_button = findElement(By.xpath(Elements.loginButton));
         login_field.sendKeys(username);
         password_field.sendKeys(password);
         login_button.click();
     }
 
     public void logOut(){
-        WebElement userMenu = findElement(By.xpath("//nav[@class=\"global\"]//a/span"));
+        WebElement userMenu = findElement(By.xpath(Elements.userMenu));
         userMenu.click();
-        WebElement logOutButton = findElement(By.xpath("//a[@id=\"log_out\"]"));
+        WebElement logOutButton = findElement(By.xpath(Elements.logoutButton));
         logOutButton.click();
-        navigate().to("http://192.168.0.210:2990/jira/secure/Dashboard.jspa");
+        navigate().to(homeUrl);
     }
 
     public void openIssuesList(){
-        WebElement issuesLink = waitForElement("//a[@id=\"find_link\"]", 5);
+        WebElement issuesLink = waitForElement(Elements.issuesLink, 5);
         issuesLink.click();
-        WebElement searchButton = findElement(By.xpath("//input[@id=\"issue-filter-submit\"]"));
+        WebElement searchButton = findElement(By.xpath(Elements.searchButton));
         searchButton.click();
-        WebElement sortByQueueButton = findElement(By.xpath("//span[@title=\"Sort By Queue Position\"]"));
+        WebElement sortByQueueButton = findElement(By.xpath(Elements.sortByQueueButton));
         sortByQueueButton.click();
     }
 
@@ -109,12 +120,12 @@ public class Browser extends FirefoxDriver implements WebDriver{
     }
 
     public WebElement getRowByQueuePosition(int pos){
-        String xpath = String.format("//td[@class=\"nav customfield_10000\" and text()=%d]", pos);
+        String xpath = String.format(Elements.queueFieldOnPos, pos);
         return waitForElement(xpath, 5);
     }
 
     public String getTicketIdByQueuePosition(int pos){
-        String xpath = String.format("//tr[td/text()=%d]/td[@class=\"nav issuekey\"]", pos);
+        String xpath = String.format(Elements.rowOnPos, pos);
         return findElement(By.xpath(xpath)).getText();
     }
 
