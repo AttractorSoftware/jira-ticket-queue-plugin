@@ -12,19 +12,19 @@
             <tr valign="top">
                 <td>
                     #foreach($queue in $queues.entrySet())
-                        <p>Изменения в очереди <a href="#">$queue.key</a>:</p>
+                        <p>Изменения в очереди <a href="$baseurl/secure/IssueNavigator!executeAdvanced.jspa?jqlQuery=status+in+%28Open%2C+%27In+Progress%27%2C+Reopened%29+order+by+$queue.key&runQuery=true&clear=true">$queue.key</a>:</p>
                         <table border="0" cellpadding="0" cellspacing="0" width="100%">
                             <tr>
                                 <td>Задача</td>
                                 <td>Изменение<br/>положения</td>
                             </tr>
                             #foreach($change in $queue.value)
-                                <tr>
+                                <tr style="border-top: 1px solid gray">
                                     <td>
                                         <a href="$baseurl/browse/$change.getIssue().key">$change.getIssue().key</a>:
                                         <a href="$baseurl/browse/$change.getIssue().key">$change.getIssue().summary</a>
                                     </td>
-                                    <td> $change.getPrevValue() &rarr; <b>$change.getNewValue()</b> </td>
+                                    <td> $change.getPrevValue().longValue() &rarr; <b>$change.getNewValue().longValue()</b> </td>
                                 </tr>
                             #end
                         </table>

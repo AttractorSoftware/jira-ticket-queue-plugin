@@ -29,13 +29,15 @@ public class NotificationCenter {
 
     public void createUpdatedValueMessages(IssueChange issueChange) {
         Group group = groupManager.getGroup(issueChange.getQueueName());
+        Collection<String> userNamesInGroup = groupManager.getUserNamesInGroup(group);
         List<String> usernames = watcherManager.getCurrentWatcherUsernames(issueChange.getIssue());
+        usernames.addAll(userNamesInGroup);
         for(String username:usernames) {
             User user = userUtil.getUser(username);
-            SortedSet<Group> userGroups = userUtil.getGroupsForUser(username);
-            if(userGroups.contains(group)) {
+//            SortedSet<Group> userGroups = userUtil.getGroupsForUser(username);
+//            if(userGroups.contains(group)) {
                 createNewMessageForChangedDisposition(issueChange, user);
-            }
+//            }
         }
 
     }
