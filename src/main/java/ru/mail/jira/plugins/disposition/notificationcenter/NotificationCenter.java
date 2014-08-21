@@ -31,7 +31,7 @@ public class NotificationCenter {
         Group group = groupManager.getGroup(issueChange.getQueueName());
         Collection<String> userNamesInGroup = groupManager.getUserNamesInGroup(group);
         List<String> usernames = watcherManager.getCurrentWatcherUsernames(issueChange.getIssue());
-        usernames.addAll(userNamesInGroup);
+        usernames = mergeUsernames(usernames, userNamesInGroup);
         for(String username:usernames) {
             User user = userUtil.getUser(username);
 //            SortedSet<Group> userGroups = userUtil.getGroupsForUser(username);
@@ -40,6 +40,12 @@ public class NotificationCenter {
 //            }
         }
 
+    }
+
+    private List<String> mergeUsernames(List<String> usernames, Collection<String> userNamesInGroup) {
+        Set<String> noDuplicateUsernames = new HashSet<String>(usernames);
+        noDuplicateUsernames.addAll(userNamesInGroup);
+        return new ArrayList<String>(noDuplicateUsernames);
     }
 
 
