@@ -28,7 +28,7 @@ public class MessageSender implements Startable {
                     e.printStackTrace();
                 }
             }
-        }, 0, MINUTE);
+        }, 0, 5*MINUTE);
     }
 
 
