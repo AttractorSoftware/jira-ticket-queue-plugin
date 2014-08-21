@@ -149,5 +149,14 @@
 
     <!-- Internalization resource -->
     <resource type="i18n" name="i18n" location="ru/mail/jira/plugins/disposition/i18n/jira-issues-disposition"/>
+    <resource type="velocity" name="email-template" location="ru/mail/jira/plugins/disposition/templates/email/email-template.vm"/>
+
+    <component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties" />
+    <component-import key="eventPublisher" interface="com.atlassian.event.api.EventPublisher"/>
+    <component key="eventListener" class="ru.mail.jira.plugins.disposition.eventlistener.EventListenerImpl"/>
+    <component key="eventListenerInit" name="Event Listener Initializer" class="ru.mail.jira.plugins.disposition.eventlistener.ListenerInstaller"/>
+    <component key="notificationCenter" name="Notification Center" class="ru.mail.jira.plugins.disposition.notificationcenter.NotificationCenter"/>
+    <component key="messageSender" name="Message Sender" class="ru.mail.jira.plugins.disposition.notificationcenter.MessageSender" />
+    <component-import key="velocity-renderer" interface="com.atlassian.templaterenderer.TemplateRenderer" />
 
 </atlassian-plugin>

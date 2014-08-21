@@ -10,6 +10,7 @@ import com.atlassian.crowd.embedded.api.User;
 import com.atlassian.jira.issue.Issue;
 import com.atlassian.jira.issue.fields.CustomField;
 import com.atlassian.jira.issue.search.SearchException;
+import com.atlassian.jira.issue.search.SearchProvider;
 import com.atlassian.jira.jql.parser.JqlParseException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -118,4 +119,8 @@ public interface DispositionManager {
      */
     @Nullable
     public String replaceCurrentUser(@Nullable String jql, @Nullable String user);
+
+    public DispositionConfigurationManager getDispositionConfigurationManager();
+
+    public SearchProvider getSearchProvider();
 }

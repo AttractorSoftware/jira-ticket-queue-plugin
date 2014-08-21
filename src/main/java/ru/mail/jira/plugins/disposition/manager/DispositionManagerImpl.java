@@ -1,8 +1,10 @@
 package ru.mail.jira.plugins.disposition.manager;
 
+import com.atlassian.crowd.embedded.api.Group;
 import com.atlassian.crowd.embedded.api.User;
 import com.atlassian.jira.ComponentManager;
 import com.atlassian.jira.bc.issue.search.SearchService;
+import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.issue.CustomFieldManager;
 import com.atlassian.jira.issue.Issue;
 import com.atlassian.jira.issue.ModifiedValue;
@@ -17,6 +19,8 @@ import com.atlassian.jira.issue.util.DefaultIssueChangeHolder;
 import com.atlassian.jira.jql.builder.JqlQueryBuilder;
 import com.atlassian.jira.jql.parser.JqlParseException;
 import com.atlassian.jira.jql.parser.JqlQueryParser;
+import com.atlassian.jira.security.groups.GroupManager;
+import com.atlassian.jira.user.util.UserUtil;
 import com.atlassian.jira.util.I18nHelper;
 import com.atlassian.jira.util.ImportUtils;
 import com.atlassian.jira.web.bean.PagerFilter;
@@ -26,6 +30,8 @@ import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.mail.jira.plugins.disposition.customfields.IssueDispositionCF;
+import ru.mail.jira.plugins.disposition.notificationcenter.IssueChange;
+import ru.mail.jira.plugins.disposition.notificationcenter.NotificationCenter;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -44,6 +50,7 @@ public class DispositionManagerImpl implements DispositionManager {
     private static final int SHIFT_DOWN = 1;
 
     private static final Logger log = Logger.getLogger(DispositionManagerImpl.class);
+    public static final String QUEUE_MANAGER_GROUP_NAME = "queueManager";
 
     @NotNull
     private final JqlQueryParser jqlQueryParser;
@@ -66,6 +73,17 @@ public class DispositionManagerImpl implements DispositionManager {
     @NotNull
     private final DispositionConfigurationManager dispositionConfigurationManager;
 
+    private NotificationCenter notificationCenter;
+
+    private static DispositionManagerImpl instance;
+
+    public static DispositionManagerImpl getInstance() {
+        return instance;
+    }
+
+    private GroupManager groupManager = ComponentAccessor.getGroupManager();
+    private UserUtil userUtil = ComponentAccessor.getUserUtil();
+
 
     public DispositionManagerImpl(@NotNull JqlQueryParser jqlQueryParser, @NotNull SearchProvider searchProvider, @NotNull SearchService searchService, @NotNull CustomFieldManager customFieldManager, @NotNull JiraBaseUrls jiraBaseUrls, @NotNull I18nHelper.BeanFactory i18nFactory, @NotNull DispositionConfigurationManager dispositionConfigurationManager) {
         this.jqlQueryParser = jqlQueryParser;
@@ -75,6 +93,8 @@ public class DispositionManagerImpl implements DispositionManager {
         this.jiraBaseUrls = jiraBaseUrls;
         this.i18nFactory = i18nFactory;
         this.dispositionConfigurationManager = dispositionConfigurationManager;
+        this.notificationCenter = NotificationCenter.getInstance();
+        instance = this;
     }
 
     @Override
@@ -196,7 +216,7 @@ public class DispositionManagerImpl implements DispositionManager {
     @Override
     public void setDisposition(@Nullable Issue high, @NotNull Issue dragged, @Nullable Issue low, @NotNull Collection<User> users, @NotNull Collection<String> errors, @Nullable Integer index, @Nullable String queueID) throws SearchException, JqlParseException {
 
-        User currentUser = ComponentManager.getInstance().getJiraAuthenticationContext().getLoggedInUser();
+        User currentUser = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
 
         final I18nHelper i18n = i18nFactory.getInstance(currentUser);
 
@@ -213,6 +233,19 @@ public class DispositionManagerImpl implements DispositionManager {
             errors.add(i18n.getText("ru.mail.jira.plugins.disposition.manager.error.issue.not.in.jql.for.user", dragged.getKey()));
             return;
         }
+
+        Group group = groupManager.getGroup(QUEUE_MANAGER_GROUP_NAME);
+        SortedSet<Group> userGroups = userUtil.getGroupsForUser(user.getName());
+        if(!userGroups.contains(group)) {
+            String contactList = "";
+            Collection<User> queueManagers = groupManager.getUsersInGroup(group.getName());
+            for(User manager:queueManagers) {
+                contactList += String.format("%s(%s) ", manager.getDisplayName(), manager.getEmailAddress());
+            }
+            errors.add(String.format(i18n.getText("ru.mail.jira.plugins.disposition.manager.error.permission.denied"), contactList));
+            return;
+        }
+
 
         String jql = replaceCurrentUser(dispositionConfigurationManager.getQuery(field), user.getName());
         if (jql == null || jql.isEmpty()) {
@@ -681,6 +714,16 @@ public class DispositionManagerImpl implements DispositionManager {
         if (reindex) {
             indexIssue(issue);
         }
+        notificationCenter.createUpdatedValueMessages(getMessageData(customField, prevValue, newValue, issue));
+    }
+
+    private IssueChange getMessageData(CustomField customField, Double prevValue, Double newValue, Issue issue) {
+        IssueChange issueChange = new IssueChange();
+        issueChange.setQueueName(customField.getName());
+        issueChange.setIssue(issue);
+        issueChange.setPrevValue(prevValue);
+        issueChange.setNewValue(newValue);
+        return issueChange;
     }
 
 
@@ -699,6 +742,16 @@ public class DispositionManagerImpl implements DispositionManager {
         } catch (IndexException e) {
             log.error("Unable to index issue: " + issue.getKey(), e);
         }
+    }
+
+    @NotNull
+    public DispositionConfigurationManager getDispositionConfigurationManager() {
+        return dispositionConfigurationManager;
+    }
+
+    @NotNull
+    public SearchProvider getSearchProvider() {
+        return searchProvider;
     }
 
 }

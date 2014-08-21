@@ -1,0 +1,48 @@
+#parse("templates/email/html/includes/emailconstants.vm")
+#parse("templates/email/html/includes/header.vm")
+<tr valign="top">
+    <td id="email-banner" style="padding:32px 32px 0 32px;">
+        <p>Здравствуйте. Вы получили это сообщение потому, что как минимум одна из задач, за которой вы следите поменяло свое положение в очереди.</p>
+        Вот, как поменялось положение ваших задач в очереди:
+    </td>
+</tr>
+<tr valign="top">
+    <td id="email-fields" style="padding:0 32px 32px 32px;">
+        <table border="0" cellpadding="0" cellspacing="0" style="padding:0;text-align:left;width:100%;" width="100%">
+            <tr valign="top">
+                <td>
+                    #foreach($queue in $queues.entrySet())
+                        <p>Изменения в очереди <a href="#">$queue.key</a>:</p>
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tr>
+                                <td>Задача</td>
+                                <td>Изменение<br/>положения</td>
+                            </tr>
+                            #foreach($change in $queue.value)
+                                <tr>
+                                    <td>
+                                        <a href="$baseurl/browse/$change.getIssue().key">$change.getIssue().key</a>:
+                                        <a href="$baseurl/browse/$change.getIssue().key">$change.getIssue().summary</a>
+                                    </td>
+                                    <td> $change.getPrevValue() &rarr; <b>$change.getNewValue()</b> </td>
+                                </tr>
+                            #end
+                        </table>
+                    #end
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p><hr/></p>
+                    По вопросам изменения положения задач в очередях вы можете обратиться к следующим людям:
+                    <ul>
+                    #foreach($queueManager in $queueManagers)
+                        <li>$queueManager.getDisplayName(): <a href="mailto:$queueManager.getEmailAddress()">$queueManager.getEmailAddress()</a></li>
+                    #end
+                    </ul>
+                </td>
+            </tr>
+        </table>
+    </td>
+</tr>
+#parse("templates/email/html/includes/footer.vm")
