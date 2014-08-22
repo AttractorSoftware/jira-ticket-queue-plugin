@@ -35,7 +35,6 @@ public class ElementsXPath {
     public static String addColumnButton = "//input[@id=\"issue-nav-add-columns-submit\"]";
     public static String reindexButton = "//input[@id=\"reindex-btn\"]";
     public static String hideColumnButton = "//img[@title=\"Hide column '%s'\"]";
-    public static String welcomeButton = "//a[@class=\"welcome-screen-action add-project-trigger\"]";
     public static String projectNameField = "//input[@id=\"add-project-name\"]";
     public static String addProjectButton = "//input[@id=\"add-project-submit\"]";
     public static String groupNameField = "(//input[@type=\"text\"])[3]";
@@ -44,6 +43,8 @@ public class ElementsXPath {
     public static String addUsersToGroupInput = "//textarea[@id=\"usersToAssignStr\"]";
     public static String joinButton = "//input[@value=\"<< Join\"]";
     public static String issueToolButton = "(//td[@class=\"nav issue_actions\"]//span)[%d]";
+    public static String issueTableToolButton = "//a[@id='toolOptions']/span";
     public static String closeOption = "(//a[@class=\"aui-list-item-link issueaction-workflow-transition\"])[1]";
     public static String closeIssueButton = "//input[@id='issue-workflow-transition-submit']";
+    public static String editAllOption = "//a[@id='bulkedit_all']";
 }

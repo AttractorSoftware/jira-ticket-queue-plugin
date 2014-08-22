@@ -35,21 +35,28 @@ public class Browser extends FirefoxDriver implements WebDriver {
         findElementByXPath(ElementsXPath.loginField).sendKeys(username);
         findElementByXPath(ElementsXPath.passwordField).sendKeys(password);
         findElementByXPath(ElementsXPath.loginButton).click();
+        sleep(3000);
     }
 
     public void logOut(){
         findElementByXPath(ElementsXPath.userMenu).click();
         findElementByXPath(ElementsXPath.logoutButton).click();
-        navigate().to(homeUrl);
+        get(homeUrl);
     }
 
     public void openIssuesList(){
-        navigate().to(url(JiraUrls.issues));
+        get(url(JiraUrls.issues));
         findElementByXPath(ElementsXPath.searchButton).click();
     }
 
     public void sortIssues(){
         findElementByXPath(ElementsXPath.sortByQueueButton).click();
+        sleep(2000);
+        int upperRowNumber = Integer.parseInt(findElementByXPath("//tr[3]/td[11]").getText());
+        int lowerRowNumber = Integer.parseInt(findElementByXPath("//tr[4]/td[11]").getText());
+        if(upperRowNumber>lowerRowNumber){
+            findElementByXPath(ElementsXPath.sortByQueueButton).click();
+        }
     }
 
     public void resetLocalQueue(){
@@ -129,29 +136,30 @@ public class Browser extends FirefoxDriver implements WebDriver {
     }
 
     public void createIssues(int count) {
-        findElementByXPath(ElementsXPath.issuesMenu).click();
+        goHome();
+        waitForElement(ElementsXPath.issuesMenu, 5).click();
         findElementByXPath(ElementsXPath.createIssue).click();
-        WebElement anotherIssueCheckbox = waitForElement(ElementsXPath.createAnotherCheckbox, 5);
-        WebElement summaryField = findElementByXPath(ElementsXPath.createIssueSummaryField);
-        WebElement submitButton = findElementByXPath(ElementsXPath.createIssueSubmitButton);
-        anotherIssueCheckbox.click();
-        try {
-            for(int i=1; i<count; i++) {
-                summaryField.sendKeys("i" + i);
-                submitButton.click();
-                Thread.sleep(1000);
-            }
+        waitForElement(ElementsXPath.createAnotherCheckbox, 5).click();
+        for(int i=1; i<count; i++) {
+            findElementByXPath(ElementsXPath.createIssueSummaryField).sendKeys("i" + i);
+            findElementByXPath(ElementsXPath.createIssueSubmitButton).click();
+            sleep(2000);
         }
-        catch (InterruptedException e) {
+        findElementByXPath(ElementsXPath.createAnotherCheckbox).click();
+        findElementByXPath(ElementsXPath.createIssueSummaryField).sendKeys("i" + count);
+        findElementByXPath(ElementsXPath.createIssueSubmitButton).click();
+    }
+
+    private void sleep(long millis){
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        anotherIssueCheckbox.click();
-        summaryField.sendKeys("i"+count);
-        submitButton.click();
     }
 
     public void reindexIssues(){
-        navigate().to(url(JiraUrls.reindexIssues));
+        get(url(JiraUrls.reindexIssues));
         findElementByXPath(ElementsXPath.reindexButton).click();
     }
 
@@ -169,36 +177,36 @@ public class Browser extends FirefoxDriver implements WebDriver {
 
     public void issueIsClosed() {
         openIssuesList();
-        findElementByXPath(String.format(ElementsXPath.issueToolButton, 4)).click();
+        findElementByXPath(String.format(ElementsXPath.issueToolButton, 1)).click();
         findElementByXPath(ElementsXPath.closeOption).click();
         findElementByXPath(ElementsXPath.closeIssueButton).click();
     }
 
     public void createQueueField() {
-        navigate().to(JiraUrls.customFields);
+        get(url(JiraUrls.customFields));
         findElementByXPath(ElementsXPath.addCustomFieldButton).click();
         findElementByXPath(ElementsXPath.issueDispositionOption).click();
         findElementByXPath(ElementsXPath.addCFNextButton).click();
         findElementByXPath(ElementsXPath.fieldNameInput).sendKeys("Disposition");
         findElementByXPath(ElementsXPath.addCFNextButton).click();
         List<WebElement> checkboxes = findElementsByXPath(ElementsXPath.screenCheckboxes);
-        for(int i=1; i<4; i++){
+        for(int i=0; i<3; i++){
             checkboxes.get(i).click();
         }
         findElementByXPath(ElementsXPath.submitButton).click();
         findElementByXPath(ElementsXPath.customFieldToolsButton).click();
         waitForElement(ElementsXPath.configureFieldOption, 5).click();
         findElementByXPath(ElementsXPath.editJqlLink).click();
-        findElementByXPath(ElementsXPath.jqlField).sendKeys("Status in (Open, \"In Progress\", Reopened) order by \"Key\" desc");
+        findElementByXPath(ElementsXPath.jqlField).sendKeys("Status in (Open, \"In Progress\", Reopened) order by \"Disposition\" asc, \"Key\" desc");
         findElementByXPath(ElementsXPath.submitButton).click();
     }
 
     public void goHome() {
-        navigate().to(url(JiraUrls.dashboard));
+        get(url(JiraUrls.dashboard));
     }
 
     public void configureIssuesTable() {
-        navigate().to(url(JiraUrls.editIssueViewColumns));
+        get(url(JiraUrls.editIssueViewColumns));
         findElementByXPath(String.format(ElementsXPath.hideColumnButton, "Summary")).click();
         findElementByXPath(ElementsXPath.selectColumnDD).sendKeys("Di");
         findElementByXPath(ElementsXPath.addColumnButton).click();
@@ -207,7 +215,7 @@ public class Browser extends FirefoxDriver implements WebDriver {
     public boolean noClosedTicketsInQueue()
     {
         try{
-            getRowByQueuePosition(4);
+            getRowByQueuePosition(10);
         }
         catch (Exception e){
             return true;
@@ -216,15 +224,22 @@ public class Browser extends FirefoxDriver implements WebDriver {
 
     }
 
+    public void clean(){
+        removeIssues();
+        removeQueue();
+    }
+
     public void removeQueue() {
-        navigate().to(JiraUrls.customFields);
+        get(url(JiraUrls.customFields));
         findElementByXPath(ElementsXPath.customFieldToolsButton).click();
         waitForElement(ElementsXPath.deleteFieldOption, 5).click();
         findElementByXPath(ElementsXPath.submitButton).click();
     }
 
     public void removeIssues() {
-        navigate().to(url(JiraUrls.bulkEditIssues));
+        openIssuesList();
+        findElementByXPath(ElementsXPath.issueTableToolButton).click();
+        waitForElement(ElementsXPath.editAllOption, 2).click();
         findElementByXPath(ElementsXPath.allIssuesCheckbox).click();
         findElementByXPath(ElementsXPath.nextButton).click();
         findElementByXPath(ElementsXPath.deleteOption).click();
@@ -237,7 +252,7 @@ public class Browser extends FirefoxDriver implements WebDriver {
     }
 
     public void createProject(String projectName) {
-        findElementByXPath(ElementsXPath.welcomeButton).click();
+        get(url(JiraUrls.createProject));
         findElementByXPath(ElementsXPath.projectNameField).sendKeys(projectName);
         findElementByXPath(ElementsXPath.addProjectButton).click();
     }
@@ -248,17 +263,15 @@ public class Browser extends FirefoxDriver implements WebDriver {
     }
 
     public void createGroups(){
-        navigate().to(url(JiraUrls.groups));
-        WebElement groupNameField = findElementByXPath(ElementsXPath.groupNameField);
-        groupNameField.sendKeys("Disposition");
-        WebElement addGroupButton = findElementByXPath(ElementsXPath.addGroupButton);
-        addGroupButton.click();
-        groupNameField.sendKeys("queueManager");
-        addGroupButton.click();
+        get(url(JiraUrls.groups));
+        findElementByXPath(ElementsXPath.groupNameField).sendKeys("Disposition");
+        findElementByXPath(ElementsXPath.addGroupButton).click();
+        findElementByXPath(ElementsXPath.groupNameField).sendKeys("queueManager");
+        findElementByXPath(ElementsXPath.addGroupButton).click();
     }
 
     public void addMember(String member){
-        navigate().to(url(JiraUrls.editMembers));
+        get(url(JiraUrls.editMembers));
         Actions builder = new Actions(this);
         WebElement disposition = findElementByXPath(String.format(ElementsXPath.groupOption, "Disposition"));
         WebElement queueManager = findElementByXPath(String.format(ElementsXPath.groupOption, "queueManager"));

@@ -1,19 +1,10 @@
 package it.ru.mail.jira.plugins.disposition;
 
 import cucumber.api.java.ru.*;
-
-import cucumber.api.java.After;
-
 import static org.junit.Assert.assertTrue;
 
 public class StepDef {
-    Browser browser = new Browser(JiraUrls.ciHome);
-
-    @After
-    public void afterScenario(){
-        Удалить_очередь();
-        Удалить_тикеты();
-    }
+    private static final Browser browser = new Browser();
 
     @Дано("^В проекте (\\d+) тикетов$")
     public void В_проекте_н_тикетов(int n){
@@ -33,17 +24,17 @@ public class StepDef {
         browser.sortIssues();
     }
 
-    @И("^Я создаю поле очереди$")
+    @И("^Создать поле очереди$")
     public void Создать_поле_очереди(){
         browser.createQueueField();
     }
 
-    @И("^Я настраиваю отображение поля очереди$")
+    @И("^Настроить отображение поля очереди$")
     public void Настроить_отображение_поля_очереди(){
         browser.configureIssuesTable();
     }
 
-    @И("^Я реиндексирую тикеты$")
+    @И("^Реиндексировать тикеты$")
     public void Реиндексировать_тикеты(){
         browser.reindexIssues();
     }
@@ -66,7 +57,7 @@ public class StepDef {
     @Дано("^В очереди (\\d+) тикетов$")
     public void В_очереди_н_тикетов(int n){
         В_проекте_н_тикетов(n);
-        Добавить_очередь();
+        Реиндексировать_тикеты();
     }
 
     @И("^Переместить тикет с (\\d+) места на (\\d+) место$")
@@ -89,19 +80,9 @@ public class StepDef {
         Я_вхожу_в_систему_с_логином_и_паролем("admin", "admin");
     }
 
-    @И("^Я удаляю очередь$")
-    public void Удалить_очередь(){
-        browser.removeQueue();
-    }
-
     @И("^Я на главной странице$")
     public void Я_на_главной_странице(){
         browser.goHome();
-    }
-
-    @И("^Я удаляю тикеты$")
-    public void Удалить_тикеты(){
-        browser.removeIssues();
     }
 
     @И("^Создан проект \"([^\"]*)\"$")
@@ -112,5 +93,15 @@ public class StepDef {
     @И("^Я вхожу в управляющие группы$")
     public void Я_вхожу_в_управляющие_группы(){
         browser.configureGroups();
+    }
+
+    @И("^Я удаляю тикеты$")
+    public void Я_удаляю_тикеты(){
+        browser.removeIssues();
+    }
+
+    @И("^Я завершаю тесирование$")
+    public void Я_завершаю_тесирование(){
+        browser.quit();
     }
 }
