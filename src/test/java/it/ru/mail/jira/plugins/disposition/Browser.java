@@ -35,7 +35,7 @@ public class Browser extends FirefoxDriver implements WebDriver {
         findElementByXPath(ElementsXPath.loginField).sendKeys(username);
         findElementByXPath(ElementsXPath.passwordField).sendKeys(password);
         findElementByXPath(ElementsXPath.loginButton).click();
-        sleep(3000);
+        sleep(10000);
     }
 
     public void logOut(){
