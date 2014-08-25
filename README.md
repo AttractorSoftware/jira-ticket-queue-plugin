@@ -26,4 +26,5 @@ jira-ticket-queue-plugin
 * Через run_tests.sh или вручную:
 
 `atlas-clean`
+
 `atlas-integration-test`
