@@ -31,6 +31,7 @@ public class Browser extends FirefoxDriver implements WebDriver {
     }
 
     public void loginWithUsernameAndPassword(String username, String password){
+        get(homeUrl);
         switchTo().frame(findElementByXPath(ElementsXPath.loginFrame));
         findElementByXPath(ElementsXPath.loginField).sendKeys(username);
         findElementByXPath(ElementsXPath.passwordField).sendKeys(password);
@@ -39,6 +40,7 @@ public class Browser extends FirefoxDriver implements WebDriver {
     }
 
     public void logOut(){
+        get(homeUrl);
         findElementByXPath(ElementsXPath.userMenu).click();
         findElementByXPath(ElementsXPath.logoutButton).click();
         get(homeUrl);
@@ -47,6 +49,7 @@ public class Browser extends FirefoxDriver implements WebDriver {
     public void openIssuesList(){
         get(url(JiraUrls.issues));
         findElementByXPath(ElementsXPath.searchButton).click();
+        sleep(3000);
     }
 
     public void sortIssues(){
@@ -57,54 +60,29 @@ public class Browser extends FirefoxDriver implements WebDriver {
         if(upperRowNumber>lowerRowNumber){
             findElementByXPath(ElementsXPath.sortByQueueButton).click();
         }
-    }
-
-    public void resetLocalQueue(){
-        queue.clear();
-        createLocalQueue();
+        sleep(2000);
     }
 
     public void moveIssue(int fromPos, int toPos){
         resetLocalQueue();
-        moveIssueInQueue(fromPos, toPos);
         moveIssueLocally(fromPos, toPos);
+        moveIssueInQueue(fromPos, toPos);
+        sleep(5000);
     }
 
     public boolean queueCorrect(){
+        String key;
+        String localkey;
         for(int i=QUEUE_START; i<=QUEUE_END; i++)
         {
-            if(getTicketKeyByQueuePosition(i).equals(queue.get(i-1))){
+            key = getTicketKeyByQueuePosition(i);
+            localkey = queue.get(i-1);
+            System.out.println(key+"   "+localkey);
+            if(!key.equals(localkey)){
                 return false;
             }
         }
         return true;
-    }
-
-    public void createLocalQueue(){
-        String ticketId;
-        for(int i=QUEUE_START; i<=QUEUE_END; i++)
-        {
-            ticketId = getTicketKeyByQueuePosition(i);
-            queue.add(i-1, ticketId);
-        }
-    }
-
-    public void moveIssueLocally(int fromPos, int toPos){
-        String movedTicketId = queue.get(fromPos-1);
-        if(fromPos<toPos){
-            for(int i=fromPos-1; i<toPos-1; i++)
-            {
-                queue.set(i, queue.get(i + 1));
-            }
-        }
-        else
-        {
-            for(int i=fromPos-1; i>toPos-1; i--)
-            {
-                queue.set(i, queue.get(i - 1));
-            }
-        }
-        queue.set(toPos-1, movedTicketId);
     }
 
     public void moveIssueInQueue(int fromPos, int toPos){
@@ -120,21 +98,6 @@ public class Browser extends FirefoxDriver implements WebDriver {
                 .perform();
     }
 
-    public WebElement getRowByQueuePosition(int pos){
-        String xpath = String.format(ElementsXPath.rowOnPos, pos);
-        return waitForElement(xpath, 5);
-    }
-
-    public String getTicketKeyByQueuePosition(int pos){
-        String xpath = String.format(ElementsXPath.queueKeyOnPos, pos);
-        return findElementByXPath(xpath).getText();
-    }
-
-    public WebElement waitForElement(String xpath, int timeoutSeconds){
-        manage().timeouts().implicitlyWait(timeoutSeconds, TimeUnit.SECONDS);
-        return findElementByXPath(xpath);
-    }
-
     public void createIssues(int count) {
         goHome();
         waitForElement(ElementsXPath.issuesMenu, 5).click();
@@ -148,14 +111,7 @@ public class Browser extends FirefoxDriver implements WebDriver {
         findElementByXPath(ElementsXPath.createAnotherCheckbox).click();
         findElementByXPath(ElementsXPath.createIssueSummaryField).sendKeys("i" + count);
         findElementByXPath(ElementsXPath.createIssueSubmitButton).click();
-    }
-
-    private void sleep(long millis){
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        sleep(2000);
     }
 
     public void reindexIssues(){
@@ -182,7 +138,51 @@ public class Browser extends FirefoxDriver implements WebDriver {
         findElementByXPath(ElementsXPath.closeIssueButton).click();
     }
 
-    public void createQueueField() {
+    public boolean noClosedTicketsInQueue()
+    {
+        try{
+            getRowByQueuePosition(10);
+        }
+        catch (Exception e){
+            return true;
+        }
+        return false;
+
+    }
+
+    public void removeIssues() {
+        openIssuesList();
+        findElementByXPath(ElementsXPath.issueTableToolButton).click();
+        waitForElement(ElementsXPath.editAllOption, 2).click();
+        findElementByXPath(ElementsXPath.allIssuesCheckbox).click();
+        findElementByXPath(ElementsXPath.nextButton).click();
+        findElementByXPath(ElementsXPath.deleteOption).click();
+        findElementByXPath(ElementsXPath.nextButton).click();
+        findElementByXPath(ElementsXPath.confirmButton).click();
+    }
+
+    public void createProject(String projectName) {
+        get(url(JiraUrls.createProject));
+        findElementByXPath(ElementsXPath.projectNameField).sendKeys(projectName);
+        findElementByXPath(ElementsXPath.addProjectButton).click();
+    }
+
+    public void preconfigure(){
+        configureGroups();
+        createQueueField();
+        //в таблице должен быть хотя бы один тикет
+        //чтобы можно было настроить поля для отображения
+        createIssues(1);
+        configureIssuesTable();
+        removeIssues();
+    }
+
+    private void configureGroups() {
+        createGroups();
+        addMember("admin");
+    }
+
+    private void createQueueField() {
         get(url(JiraUrls.customFields));
         findElementByXPath(ElementsXPath.addCustomFieldButton).click();
         findElementByXPath(ElementsXPath.issueDispositionOption).click();
@@ -201,68 +201,14 @@ public class Browser extends FirefoxDriver implements WebDriver {
         findElementByXPath(ElementsXPath.submitButton).click();
     }
 
-    public void goHome() {
-        get(url(JiraUrls.dashboard));
-    }
-
-    public void configureIssuesTable() {
+    private void configureIssuesTable() {
         get(url(JiraUrls.editIssueViewColumns));
         findElementByXPath(String.format(ElementsXPath.hideColumnButton, "Summary")).click();
         findElementByXPath(ElementsXPath.selectColumnDD).sendKeys("Di");
         findElementByXPath(ElementsXPath.addColumnButton).click();
     }
 
-    public boolean noClosedTicketsInQueue()
-    {
-        try{
-            getRowByQueuePosition(10);
-        }
-        catch (Exception e){
-            return true;
-        }
-        return false;
-
-    }
-
-    public void clean(){
-        removeIssues();
-        removeQueue();
-    }
-
-    public void removeQueue() {
-        get(url(JiraUrls.customFields));
-        findElementByXPath(ElementsXPath.customFieldToolsButton).click();
-        waitForElement(ElementsXPath.deleteFieldOption, 5).click();
-        findElementByXPath(ElementsXPath.submitButton).click();
-    }
-
-    public void removeIssues() {
-        openIssuesList();
-        findElementByXPath(ElementsXPath.issueTableToolButton).click();
-        waitForElement(ElementsXPath.editAllOption, 2).click();
-        findElementByXPath(ElementsXPath.allIssuesCheckbox).click();
-        findElementByXPath(ElementsXPath.nextButton).click();
-        findElementByXPath(ElementsXPath.deleteOption).click();
-        findElementByXPath(ElementsXPath.nextButton).click();
-        findElementByXPath(ElementsXPath.confirmButton).click();
-    }
-
-    private String url(String path){
-        return homeUrl + path;
-    }
-
-    public void createProject(String projectName) {
-        get(url(JiraUrls.createProject));
-        findElementByXPath(ElementsXPath.projectNameField).sendKeys(projectName);
-        findElementByXPath(ElementsXPath.addProjectButton).click();
-    }
-
-    public void configureGroups() {
-        createGroups();
-        addMember("admin");
-    }
-
-    public void createGroups(){
+    private void createGroups(){
         get(url(JiraUrls.groups));
         findElementByXPath(ElementsXPath.groupNameField).sendKeys("Disposition");
         findElementByXPath(ElementsXPath.addGroupButton).click();
@@ -270,7 +216,7 @@ public class Browser extends FirefoxDriver implements WebDriver {
         findElementByXPath(ElementsXPath.addGroupButton).click();
     }
 
-    public void addMember(String member){
+    private void addMember(String member){
         get(url(JiraUrls.editMembers));
         Actions builder = new Actions(this);
         WebElement disposition = findElementByXPath(String.format(ElementsXPath.groupOption, "Disposition"));
@@ -284,4 +230,69 @@ public class Browser extends FirefoxDriver implements WebDriver {
         findElementByXPath(ElementsXPath.addUsersToGroupInput).sendKeys(member);
         findElementByXPath(ElementsXPath.joinButton).click();
     }
+
+    private String url(String path){
+        return homeUrl + path;
+    }
+
+    private void goHome() {
+        get(url(JiraUrls.dashboard));
+    }
+
+    private void sleep(long millis){
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getTicketKeyByQueuePosition(int pos){
+        String xpath = String.format(ElementsXPath.queueKeyOnPos, pos);
+        return findElementByXPath(xpath).getText();
+    }
+
+    private WebElement waitForElement(String xpath, int timeoutSeconds){
+        manage().timeouts().implicitlyWait(timeoutSeconds, TimeUnit.SECONDS);
+        return findElementByXPath(xpath);
+    }
+
+    private WebElement getRowByQueuePosition(int pos){
+        String xpath = String.format(ElementsXPath.rowOnPos, pos);
+        return waitForElement(xpath, 5);
+    }
+
+    private void resetLocalQueue(){
+        queue.clear();
+        createLocalQueue();
+    }
+
+    private void createLocalQueue(){
+        String ticketId;
+        for(int i=QUEUE_START; i<=QUEUE_END; i++)
+        {
+            ticketId = getTicketKeyByQueuePosition(i);
+            queue.add(i-1, ticketId);
+        }
+    }
+
+    private void moveIssueLocally(int fromPos, int toPos){
+        String movedTicketId = queue.get(fromPos-1);
+        if(fromPos<toPos){
+            for(int i=fromPos-1; i<toPos-1; i++)
+            {
+                queue.set(i, queue.get(i + 1));
+            }
+        }
+        else
+        {
+            for(int i=fromPos-1; i>toPos-1; i--)
+            {
+                queue.set(i, queue.get(i - 1));
+            }
+        }
+        queue.set(toPos-1, movedTicketId);
+    }
+
+
 }

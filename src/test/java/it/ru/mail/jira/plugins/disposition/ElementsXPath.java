@@ -27,7 +27,6 @@ public class ElementsXPath {
     public static String screenCheckboxes = "//input[@type=\"checkbox\"]";
     public static String customFieldToolsButton = "//a[@class=\"aui-dd-link cog-dd js-default-dropdown\"]";
     public static String configureFieldOption = "(//a[@class=\"aui-list-item-link\"])[1]";
-    public static String deleteFieldOption = "(//a[@class=\"aui-list-item-link\"])[4]";
     public static String editJqlLink = "(//td[@class=\"fieldValueArea\"]/a)[3]";
     public static String jqlField = "//input[@id=\"jql\"]";
     public static String submitButton = "//input[@type=\"submit\"]";
