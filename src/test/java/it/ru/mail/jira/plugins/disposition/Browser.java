@@ -185,6 +185,7 @@ public class Browser extends FirefoxDriver implements WebDriver {
     private void createQueueField() {
         get(url(JiraUrls.customFields));
         findElementByXPath(ElementsXPath.addCustomFieldButton).click();
+        sleep(3000);
         findElementByXPath(ElementsXPath.issueDispositionOption).click();
         findElementByXPath(ElementsXPath.addCFNextButton).click();
         findElementByXPath(ElementsXPath.fieldNameInput).sendKeys("Disposition");
