@@ -14,6 +14,7 @@ import com.atlassian.jira.issue.search.SearchProvider;
 import com.atlassian.jira.jql.parser.JqlParseException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import ru.mail.jira.plugins.disposition.notificationcenter.IssueChangeReason;
 
 import java.util.Collection;
 
@@ -70,25 +71,25 @@ public interface DispositionManager {
 
     /**
      * Shift issues down - change disposition in turn
-     *
-     * @param jql          - query, used to get list of issues
+     *  @param jql          - query, used to get list of issues
      * @param startValue   - value of disposition field, from which we are starting shifting
      * @param field        - disposition custom field
      * @param user         - searcher
      * @param currentIssue - issue, currently moved - should be skipped from query
+     * @param reason
      */
-    public void shiftIssuesDown(@NotNull String jql, @NotNull Double startValue, @NotNull CustomField field, @NotNull User user, @NotNull Issue currentIssue);
+    public void shiftIssuesDown(@NotNull String jql, @NotNull Double startValue, @NotNull CustomField field, @NotNull User user, @NotNull Issue currentIssue, IssueChangeReason reason);
 
     /**
      * Shift issues up - change disposition in turn
-     *
-     * @param jql          - query, used to get list of issues
+     *  @param jql          - query, used to get list of issues
      * @param startValue   - value of disposition field, from which we are starting shifting
      * @param field        - disposition custom field
      * @param user         - searcher
      * @param currentIssue - issue, currently moved - should be skipped from query
+     * @param reason
      */
-    public void shiftIssuesUp(@NotNull String jql, @NotNull Double startValue, @NotNull CustomField field, @NotNull User user, @NotNull Issue currentIssue);
+    public void shiftIssuesUp(@NotNull String jql, @NotNull Double startValue, @NotNull CustomField field, @NotNull User user, @NotNull Issue currentIssue, IssueChangeReason reason);
 
     /**
      * Get first custom field of specified type for issue

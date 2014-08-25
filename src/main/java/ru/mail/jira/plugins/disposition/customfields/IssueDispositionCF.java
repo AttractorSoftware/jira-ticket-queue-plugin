@@ -73,7 +73,7 @@ public class IssueDispositionCF extends NumberCFType {
         assert null != jql;
 
         if (!DispositionUtils.isSkipShift()) {
-            dispositionManager.shiftIssuesDown(jql, value, customField, loggedInUser, issue);
+            dispositionManager.shiftIssuesDown(jql, value, customField, loggedInUser, issue, null);
         }
     }
 

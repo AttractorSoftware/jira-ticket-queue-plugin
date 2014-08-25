@@ -17,17 +17,15 @@ import com.atlassian.jira.issue.util.DefaultIssueChangeHolder;
 import com.atlassian.jira.jql.builder.JqlOrderByBuilder;
 import com.atlassian.jira.jql.builder.JqlQueryBuilder;
 import com.atlassian.jira.ofbiz.OfBizDelegator;
-import com.atlassian.jira.util.collect.MapBuilder;
 import com.atlassian.jira.web.bean.PagerFilter;
-import com.atlassian.query.Query;
 import com.atlassian.query.order.SortOrder;
 import org.apache.log4j.Logger;
-import org.ofbiz.core.entity.GenericValue;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import ru.mail.jira.plugins.disposition.manager.DispositionConfigurationManager;
 import ru.mail.jira.plugins.disposition.manager.DispositionManager;
 import ru.mail.jira.plugins.disposition.manager.DispositionManagerImpl;
+import ru.mail.jira.plugins.disposition.notificationcenter.IssueChangeReason;
 
 import java.util.List;
 
@@ -114,7 +112,10 @@ public class EventListenerImpl extends AbstractIssueEventListener implements Ini
     private void shiftIssues(Issue issue, CustomField customField, Issue lastIssue) {
         DispositionConfigurationManager dispositionConfigurationManager = dispositionManager.getDispositionConfigurationManager();
         String query = dispositionConfigurationManager.getQuery(customField);
-        dispositionManager.shiftIssuesUp(query, (Double) lastIssue.getCustomFieldValue(customField), customField, issue.getAssigneeUser(), issue);
+        IssueChangeReason reason = new IssueChangeReason();
+        reason.setCausalIssue(issue);
+        reason.setReasonType(IssueChangeReason.ISSUE_RESOLVED);
+        dispositionManager.shiftIssuesUp(query, (Double) lastIssue.getCustomFieldValue(customField), customField, issue.getAssigneeUser(), issue, reason);
     }
 
     private Issue getLastIssue(Issue issue, CustomField customField) {

@@ -15,16 +15,37 @@
                         <p>Изменения в очереди <a href="$baseurl/secure/IssueNavigator!executeAdvanced.jspa?jqlQuery=status+in+%28Open%2C+%27In+Progress%27%2C+Reopened%29+order+by+$queue.key&runQuery=true&clear=true">$queue.key</a>:</p>
                         <table border="0" cellpadding="0" cellspacing="0" width="100%">
                             <tr>
-                                <td>Задача</td>
-                                <td>Изменение<br/>положения</td>
+                                <td><b>Измение<br/> позиции</b></td>
+                                <td><b>Задача</b></td>
+                                <td><b>Причина</b></td>
                             </tr>
                             #foreach($change in $queue.value)
                                 <tr style="border-top: 1px solid gray">
                                     <td>
+                                        #if($change.isNewValueMoreThanPrevValue())
+                                            <sup>$change.getPrevValue().longValue()</sup> &#8600; <b><sub style="font-size: 14px">$change.getNewValue().longValue()</sub></b>
+                                        #else
+                                            <sub>$change.getPrevValue().longValue()</sub> &#8599; <b><sup style="font-size: 14px">$change.getNewValue().longValue()</sup></b>
+                                        #end
+                                    </td>
+                                    <td>
                                         <a href="$baseurl/browse/$change.getIssue().key">$change.getIssue().key</a>:
                                         <a href="$baseurl/browse/$change.getIssue().key">$change.getIssue().summary</a>
                                     </td>
-                                    <td> $change.getPrevValue().longValue() &rarr; <b>$change.getNewValue().longValue()</b> </td>
+                                    <td>
+                                        #*  See class IssueChangeReason for magic numbers explannation  *#
+
+                                        #if($change.getReason().getReasonType() == 1)
+                                            Пользователь $change.getReason().getUserDisplayName() передвинул эту задачу в очереди.
+                                        #elseif($change.getReason().getReasonType() == 2)
+                                            Пользователь $change.getReason().getUserDisplayName() вставил задачу <a href="$baseurl/browse/$change.getReason().getCausalIssue().key">$change.getReason().getCausalIssue().key</a> в очередь выше этой.
+                                        #elseif($change.getReason().getReasonType() == 3)
+                                            Пользователь $change.getReason().getUserDisplayName() переставил задачу <a href="$baseurl/browse/$change.getReason().getCausalIssue().key">$change.getReason().getCausalIssue().key</a> в очереди ниже этой задачи.
+                                        #elseif($change.getReason().getReasonType() == 4)
+                                            Задача <a href="$baseurl/browse/$change.getReason().getCausalIssue().key">$change.getReason().getCausalIssue().key</a> была закрыта и ушла из очереди.
+                                        #end
+
+                                    </td>
                                 </tr>
                             #end
                         </table>

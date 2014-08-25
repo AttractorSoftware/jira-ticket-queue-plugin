@@ -7,6 +7,7 @@ public class IssueChange {
     Double prevValue;
     Double newValue;
     String queueName;
+    private IssueChangeReason reason;
 
     public void setIssue(Issue issue) {
         this.issue = issue;
@@ -38,5 +39,17 @@ public class IssueChange {
 
     public String getQueueName() {
         return queueName;
+    }
+
+    public void setReason(IssueChangeReason reason) {
+        this.reason = reason;
+    }
+
+    public IssueChangeReason getReason() {
+        return reason;
+    }
+
+    public boolean isNewValueMoreThanPrevValue() {
+        return newValue > prevValue;
     }
 }
