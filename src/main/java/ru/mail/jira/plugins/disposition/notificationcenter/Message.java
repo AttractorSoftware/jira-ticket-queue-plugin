@@ -68,6 +68,10 @@ public class Message {
             if (!issueChangesGroupedByQueue.containsKey(queueName)) issueChangesGroupedByQueue.put(queueName, new ArrayList<IssueChange>());
             issueChangesGroupedByQueue.get(queueName).add(issueChange);
         }
+        for(Map.Entry <String, List<IssueChange>> item : issueChangesGroupedByQueue.entrySet())
+        {
+            Collections.reverse(item.getValue());
+        }
         return issueChangesGroupedByQueue;
     }
 
