@@ -23,9 +23,9 @@
                                 <tr style="border-top: 1px solid gray">
                                     <td>
                                         #if($change.isNewValueMoreThanPrevValue())
-                                            <sup>$change.getPrevValue().longValue()</sup> &#8600; <b><sub style="font-size: 14px">$change.getNewValue().longValue()</sub></b>
+                                            <sup>$change.getPrevValue().longValue()</sup> &#8600; <b><sub style="font-size: 1.5em">$change.getNewValue().longValue()</sub></b>
                                         #else
-                                            <sub>$change.getPrevValue().longValue()</sub> &#8599; <b><sup style="font-size: 14px">$change.getNewValue().longValue()</sup></b>
+                                            <sub>$change.getPrevValue().longValue()</sub> &#8599; <b><sup style="font-size: 1.5em">$change.getNewValue().longValue()</sup></b>
                                         #end
                                     </td>
                                     <td>
