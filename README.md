@@ -1,5 +1,11 @@
 jira-ticket-queue-plugin
 ========================
+
+
+[Инструкция по настройке](https://docs.google.com/document/d/1jEVr5BUOcixxWxmWC9OvZRj_ROhL3WB1neIUoO7ec5c/edit#) находится на Google Drive.
+
+# Разработка примочки
+
 **Для проекта необходим JDK 6**
 
 **Установка Atlassian SDK на Ubuntu**
