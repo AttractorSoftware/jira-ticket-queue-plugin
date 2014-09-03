@@ -50,6 +50,8 @@ public class IssueChange {
     }
 
     public boolean isNewValueMoreThanPrevValue() {
+        if (newValue == null || prevValue == null)
+            return true; // whatever, either would be false
         return newValue > prevValue;
     }
 }

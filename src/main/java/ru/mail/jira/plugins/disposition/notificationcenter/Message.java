@@ -3,6 +3,7 @@ package ru.mail.jira.plugins.disposition.notificationcenter;
 import com.atlassian.crowd.embedded.api.Group;
 import com.atlassian.crowd.embedded.api.User;
 import com.atlassian.jira.component.ComponentAccessor;
+import com.atlassian.jira.issue.comparator.IssueConstantsComparator;
 import com.atlassian.jira.mail.Email;
 import com.atlassian.jira.security.JiraAuthenticationContext;
 import com.atlassian.jira.security.groups.GroupManager;
@@ -25,6 +26,12 @@ public class Message {
     public static final String TEMPLATE_NAME = "email-template.vm";
     public static final String ENCODING = "UTF-8";
     public static final String QUEUE_MANAGER_GROUP_NAME = "queueManager";
+
+    private static Comparator<IssueChange> comparator = new Comparator<IssueChange>(){
+        public int compare(IssueChange ic1, IssueChange ic2){
+            return (int)(ic1.getNewValue() - ic2.getNewValue());
+        }
+    };
 
     private GroupManager groupManager = ComponentAccessor.getGroupManager();
     private Group group = groupManager.getGroup(QUEUE_MANAGER_GROUP_NAME);
@@ -70,8 +77,9 @@ public class Message {
         }
         for(Map.Entry <String, List<IssueChange>> item : issueChangesGroupedByQueue.entrySet())
         {
-            Collections.reverse(item.getValue());
+            Collections.sort(item.getValue(), comparator);
         }
+
         return issueChangesGroupedByQueue;
     }
 
