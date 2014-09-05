@@ -18,6 +18,7 @@ import ru.mail.jira.plugins.disposition.config.IssueDispositionConfiguration;
 import ru.mail.jira.plugins.disposition.manager.DispositionConfigurationManager;
 import ru.mail.jira.plugins.disposition.manager.DispositionManager;
 import ru.mail.jira.plugins.disposition.manager.DispositionUtils;
+import ru.mail.jira.plugins.disposition.notificationcenter.IssueChangeReason;
 
 import java.util.List;
 
@@ -73,7 +74,10 @@ public class IssueDispositionCF extends NumberCFType {
         assert null != jql;
 
         if (!DispositionUtils.isSkipShift()) {
-            dispositionManager.shiftIssuesDown(jql, value, customField, loggedInUser, issue, null);
+            IssueChangeReason reason = new IssueChangeReason();
+            reason.setReasonType(IssueChangeReason.MANUALY_CHANED);
+            reason.setUser(loggedInUser);
+            dispositionManager.shiftIssuesDown(jql, value, customField, loggedInUser, issue, reason);
         }
     }
 

@@ -65,10 +65,10 @@ public class EventListenerImpl extends AbstractIssueEventListener implements Ini
 
 
         if(eventTypeID.equals(EventType.ISSUE_CREATED_ID)) {
-            putIssueToBottomOfQueues(issue);
+//            putIssueToBottomOfQueues(issue);
         }
         else if(eventTypeID.equals(EventType.ISSUE_REOPENED_ID)) {
-            putIssueToBottomOfQueues(issue);
+//            putIssueToBottomOfQueues(issue);
         }
         else if(eventTypeID.equals(EventType.ISSUE_CLOSED_ID)) {
             shiftUpIssuesAfterThatIssueInQueues(issue);

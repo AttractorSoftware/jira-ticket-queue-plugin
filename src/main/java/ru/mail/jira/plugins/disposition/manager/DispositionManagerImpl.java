@@ -102,6 +102,10 @@ public class DispositionManagerImpl implements DispositionManager {
     public void resetDisposition(@NotNull User userToBeReset, @NotNull Double step, @NotNull Collection<String> errors) throws JqlParseException, SearchException {
 
         User user = ComponentManager.getInstance().getJiraAuthenticationContext().getLoggedInUser();
+        IssueChangeReason reason = new IssueChangeReason();
+        reason.setReasonType(IssueChangeReason.MANUALY_CHANED);
+        reason.setUser(user);
+
         final I18nHelper i18n = i18nFactory.getInstance(user);
 
         Collection<CustomField> fields = getCustomFieldsByIssueAndType(IssueDispositionCF.class, null);
@@ -130,7 +134,7 @@ public class DispositionManagerImpl implements DispositionManager {
                 Double prevValue = getIssueValue(issue, field);
 
                 disposition += step;
-                updateValue(field, prevValue, disposition, issue, null, true);
+                updateValue(field, prevValue, disposition, issue, reason, true);
             }
 
         }
@@ -209,9 +213,13 @@ public class DispositionManagerImpl implements DispositionManager {
         String jql = replaceCurrentUser(dispositionConfigurationManager.getQuery(field), user.getName());
         assert jql != null;
 
+        IssueChangeReason reason = new IssueChangeReason();
+        reason.setReasonType(IssueChangeReason.MANUALY_CHANED);
+        reason.setUser(user);
+
         Double prevValue = getIssueValue(issue, field);
         // set value of our issue
-        updateValue(field, prevValue, value, issue, null, true);
+        updateValue(field, prevValue, value, issue, reason, true);
     }
 
     @Override
@@ -236,8 +244,7 @@ public class DispositionManagerImpl implements DispositionManager {
         }
 
         Group group = groupManager.getGroup(QUEUE_MANAGER_GROUP_NAME);
-        SortedSet<Group> userGroups = userUtil.getGroupsForUser(user.getName());
-        if(!userGroups.contains(group)) {
+        if (!groupManager.isUserInGroup(user, group)) {
             String contactList = "";
             Collection<User> queueManagers = groupManager.getUsersInGroup(group.getName());
             for(User manager:queueManagers) {
@@ -320,7 +327,7 @@ public class DispositionManagerImpl implements DispositionManager {
                     shiftIssuesDown(jql, lowValue, field, user, dragged, reasonForShiftedIssues);
                     updateValue(field, draggedValue, lowValue, dragged, reasonForDraggedIssue, true);
                 } else {
-                    updateValue(field, draggedValue, (double) lowAverage, dragged, null, true);
+                    updateValue(field, draggedValue, (double) lowAverage, dragged, reasonForDraggedIssue, true);
                 }
             } else {
                 if (lowValue != null) {
@@ -359,7 +366,7 @@ public class DispositionManagerImpl implements DispositionManager {
             }
         } else {
             // we've found average value for dragged issue - no need to shift other issues
-            updateValue(field, draggedValue, (double) average, dragged, null, true);
+            updateValue(field, draggedValue, (double) average, dragged, reasonForDraggedIssue, true);
         }
     }
 
@@ -728,6 +735,14 @@ public class DispositionManagerImpl implements DispositionManager {
         if (reindex) {
             indexIssue(issue);
         }
+        if(reason != null)
+            log.error(String.format(
+                    "DISPOSITION. DispositionManagerImpl:731. Issue: %s, prevValue-newValue: %f-%f, causalIssue: %s, reasonType: %d, user: %s",
+                    issue.getKey(), prevValue, newValue, reason.getCausalIssue().getKey(), reason.getReasonType(), reason.getUserDisplayName()));
+        else
+            log.error(String.format(
+                    "DISPOSITION. DispositionManagerImpl:731. NOREASON. Issue: %s, prevValue-newValue: %f-%f",
+                    issue.getKey(), prevValue, newValue));
         notificationCenter.createUpdatedValueMessages(getMessageData(customField, prevValue, newValue, issue, reason));
     }
 

@@ -22,11 +22,16 @@
                             #foreach($change in $queue.value)
                                 <tr style="border-top: 1px solid gray">
                                     <td>
-                                        #if($change.isNewValueMoreThanPrevValue())
-                                            <sup>$change.getPrevValue().longValue()</sup> &#8600; <b><sub style="font-size: 1.5em">$change.getNewValue().longValue()</sub></b>
+                                        #if($change.getPrevValue())
+                                            #if($change.isNewValueMoreThanPrevValue())
+                                                <sup>$change.getPrevValue().longValue()</sup> &#8600; <b><sub style="font-size: 1.5em">$change.getNewValue().longValue()</sub></b>
+                                            #else
+                                                <sub>$change.getPrevValue().longValue()</sub> &#8599; <b><sup style="font-size: 1.5em">$change.getNewValue().longValue()</sup></b>
+                                            #end
                                         #else
-                                            <sub>$change.getPrevValue().longValue()</sub> &#8599; <b><sup style="font-size: 1.5em">$change.getNewValue().longValue()</sup></b>
+                                            <b><sub style="font-size: 1.5em">$change.getNewValue().longValue()</sub></b>
                                         #end
+
                                     </td>
                                     <td>
                                         <a href="$baseurl/browse/$change.getIssue().key">$change.getIssue().key</a>:
