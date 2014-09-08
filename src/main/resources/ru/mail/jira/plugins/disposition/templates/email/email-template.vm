@@ -19,9 +19,14 @@
                                 <td><b>Задача</b></td>
                                 <td><b>Причина</b></td>
                             </tr>
+                            #*#set($position = 1)*#
                             #foreach($change in $queue.value)
                                 <tr style="border-top: 1px solid gray">
+                                   #* #if($change.getNewValue.longValue() > $postion)
+                                        <td colspan="3"><b>...</b></td>
+                                    #end*#
                                     <td>
+                                        #*#set($position = $change.getNewValue().longValue())*#
                                         #if($change.getPrevValue())
                                             #if($change.isNewValueMoreThanPrevValue())
                                                 <sup>$change.getPrevValue().longValue()</sup> &#8600; <b><sub style="font-size: 1.5em">$change.getNewValue().longValue()</sub></b>
@@ -38,16 +43,17 @@
                                         <a href="$baseurl/browse/$change.getIssue().key">$change.getIssue().summary</a>
                                     </td>
                                     <td>
+                                        #foreach($reason in $change.getReason())
                                         #*  See class IssueChangeReason for magic numbers explannation  *#
-
-                                        #if($change.getReason().getReasonType() == 1)
-                                            Пользователь $change.getReason().getUserDisplayName() передвинул эту задачу в очереди.
-                                        #elseif($change.getReason().getReasonType() == 2)
-                                            Пользователь $change.getReason().getUserDisplayName() вставил задачу <a href="$baseurl/browse/$change.getReason().getCausalIssue().key">$change.getReason().getCausalIssue().key</a> в очередь выше этой.
-                                        #elseif($change.getReason().getReasonType() == 3)
-                                            Пользователь $change.getReason().getUserDisplayName() переставил задачу <a href="$baseurl/browse/$change.getReason().getCausalIssue().key">$change.getReason().getCausalIssue().key</a> в очереди ниже этой задачи.
-                                        #elseif($change.getReason().getReasonType() == 4)
-                                            Задача <a href="$baseurl/browse/$change.getReason().getCausalIssue().key">$change.getReason().getCausalIssue().key</a> была закрыта и ушла из очереди.
+                                            #if($reason.getReasonType() == 1)
+                                                <p>Пользователь $reason.getUserDisplayName() передвинул эту задачу в очереди.</p>
+                                            #elseif($reason.getReasonType() == 2)
+                                                <p>Пользователь $reason.getUserDisplayName() вставил задачу <a href="$baseurl/browse/$reason.getCausalIssue().key">$reason.getCausalIssue().key</a> в очередь выше этой.</p>
+                                            #elseif($reason.getReasonType() == 3)
+                                                <p>Пользователь $reason.getUserDisplayName() переставил задачу <a href="$baseurl/browse/$reason.getCausalIssue().key">$reason.getCausalIssue().key</a> в очереди ниже этой задачи.</p>
+                                            #elseif($reason.getReasonType() == 4)
+                                                <p>Задача <a href="$baseurl/browse/$reason.getCausalIssue().key">$reason.getCausalIssue().key</a> была закрыта и ушла из очереди.</p>
+                                            #end
                                         #end
 
                                     </td>

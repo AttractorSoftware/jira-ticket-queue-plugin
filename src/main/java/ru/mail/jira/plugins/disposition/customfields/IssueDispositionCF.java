@@ -14,6 +14,7 @@ import com.atlassian.jira.issue.fields.config.FieldConfigItemType;
 import com.atlassian.jira.util.ErrorCollection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joda.time.DateTime;
 import ru.mail.jira.plugins.disposition.config.IssueDispositionConfiguration;
 import ru.mail.jira.plugins.disposition.manager.DispositionConfigurationManager;
 import ru.mail.jira.plugins.disposition.manager.DispositionManager;
@@ -72,12 +73,12 @@ public class IssueDispositionCF extends NumberCFType {
 
         String jql = dispositionManager.replaceCurrentUser(dispositionConfigurationManager.getQuery(customField), loggedInUser.getName());
         assert null != jql;
-
+        DateTime timestamp = new DateTime();
         if (!DispositionUtils.isSkipShift()) {
             IssueChangeReason reason = new IssueChangeReason();
             reason.setReasonType(IssueChangeReason.MANUALY_CHANED);
             reason.setUser(loggedInUser);
-            dispositionManager.shiftIssuesDown(jql, value, customField, loggedInUser, issue, reason);
+            dispositionManager.shiftIssuesDown(jql, value, customField, loggedInUser, issue, reason, timestamp);
         }
     }
 

@@ -14,6 +14,7 @@ import com.atlassian.jira.issue.search.SearchProvider;
 import com.atlassian.jira.jql.parser.JqlParseException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joda.time.DateTime;
 import ru.mail.jira.plugins.disposition.notificationcenter.IssueChangeReason;
 
 import java.util.Collection;
@@ -78,7 +79,7 @@ public interface DispositionManager {
      * @param currentIssue - issue, currently moved - should be skipped from query
      * @param reason
      */
-    public void shiftIssuesDown(@NotNull String jql, @NotNull Double startValue, @NotNull CustomField field, @NotNull User user, @NotNull Issue currentIssue, IssueChangeReason reason);
+    public void shiftIssuesDown(@NotNull String jql, @NotNull Double startValue, @NotNull CustomField field, @NotNull User user, @NotNull Issue currentIssue, IssueChangeReason reason, DateTime timestamp);
 
     /**
      * Shift issues up - change disposition in turn
@@ -89,7 +90,7 @@ public interface DispositionManager {
      * @param currentIssue - issue, currently moved - should be skipped from query
      * @param reason
      */
-    public void shiftIssuesUp(@NotNull String jql, @NotNull Double startValue, @NotNull CustomField field, @NotNull User user, @NotNull Issue currentIssue, IssueChangeReason reason);
+    public void shiftIssuesUp(@NotNull String jql, @NotNull Double startValue, @NotNull CustomField field, @NotNull User user, @NotNull Issue currentIssue, IssueChangeReason reason, DateTime timestamp);
 
     /**
      * Get first custom field of specified type for issue

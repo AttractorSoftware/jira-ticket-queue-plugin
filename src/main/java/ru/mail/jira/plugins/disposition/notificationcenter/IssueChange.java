@@ -1,13 +1,19 @@
 package ru.mail.jira.plugins.disposition.notificationcenter;
 
 import com.atlassian.jira.issue.Issue;
+import org.joda.time.DateTime;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class IssueChange {
     Issue issue;
     Double prevValue;
     Double newValue;
     String queueName;
-    private IssueChangeReason reason;
+    DateTime timestamp;
+
+    private List<IssueChangeReason> reason = new ArrayList<IssueChangeReason>();
 
     public void setIssue(Issue issue) {
         this.issue = issue;
@@ -41,11 +47,23 @@ public class IssueChange {
         return queueName;
     }
 
-    public void setReason(IssueChangeReason reason) {
-        this.reason = reason;
+    public void addReason(IssueChangeReason reason) {
+        this.reason.add(reason);
     }
 
-    public IssueChangeReason getReason() {
+    public void concatReasons(List<IssueChangeReason> reasons) {
+        this.reason.addAll(reasons);
+    }
+
+    public void setTimestamp(DateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public DateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public List<IssueChangeReason> getReason() {
         return reason;
     }
 

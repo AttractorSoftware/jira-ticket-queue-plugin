@@ -29,6 +29,7 @@ import com.atlassian.query.order.SortOrder;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joda.time.DateTime;
 import ru.mail.jira.plugins.disposition.customfields.IssueDispositionCF;
 import ru.mail.jira.plugins.disposition.notificationcenter.IssueChange;
 import ru.mail.jira.plugins.disposition.notificationcenter.IssueChangeReason;
@@ -130,11 +131,12 @@ public class DispositionManagerImpl implements DispositionManager {
             }
 
             Double disposition = DISPOSITION_START;
+            DateTime timestamp = new DateTime();
             for (Issue issue : searchResults.getIssues()) {
                 Double prevValue = getIssueValue(issue, field);
 
                 disposition += step;
-                updateValue(field, prevValue, disposition, issue, reason, true);
+                updateValue(field, prevValue, disposition, issue, reason, timestamp, true);
             }
 
         }
@@ -213,17 +215,21 @@ public class DispositionManagerImpl implements DispositionManager {
         String jql = replaceCurrentUser(dispositionConfigurationManager.getQuery(field), user.getName());
         assert jql != null;
 
+        DateTime timestamp = new DateTime();
+
         IssueChangeReason reason = new IssueChangeReason();
         reason.setReasonType(IssueChangeReason.MANUALY_CHANED);
         reason.setUser(user);
 
         Double prevValue = getIssueValue(issue, field);
         // set value of our issue
-        updateValue(field, prevValue, value, issue, reason, true);
+        updateValue(field, prevValue, value, issue, reason, timestamp, true);
     }
 
     @Override
     public void setDisposition(@Nullable Issue high, @NotNull Issue dragged, @Nullable Issue low, @NotNull Collection<User> users, @NotNull Collection<String> errors, @Nullable Integer index, @Nullable String queueID) throws SearchException, JqlParseException {
+
+        DateTime timestamp = new DateTime();
 
         User currentUser = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
 
@@ -324,10 +330,10 @@ public class DispositionManagerImpl implements DispositionManager {
 
                 if (lowAverage == null || index != 0) {
                     reasonForShiftedIssues.setReasonType(IssueChangeReason.INSERTED_ABOVE);
-                    shiftIssuesDown(jql, lowValue, field, user, dragged, reasonForShiftedIssues);
-                    updateValue(field, draggedValue, lowValue, dragged, reasonForDraggedIssue, true);
+                    shiftIssuesDown(jql, lowValue, field, user, dragged, reasonForShiftedIssues, timestamp);
+                    updateValue(field, draggedValue, lowValue, dragged, reasonForDraggedIssue, timestamp, true);
                 } else {
-                    updateValue(field, draggedValue, (double) lowAverage, dragged, reasonForDraggedIssue, true);
+                    updateValue(field, draggedValue, (double) lowAverage, dragged, reasonForDraggedIssue, timestamp, true);
                 }
             } else {
                 if (lowValue != null) {
@@ -337,16 +343,16 @@ public class DispositionManagerImpl implements DispositionManager {
                          Shift other issues up.
                         */
                         reasonForShiftedIssues.setReasonType(IssueChangeReason.REMOVED_ABOVE);
-                        shiftIssuesUp(jql, highValue, field, user, dragged, reasonForShiftedIssues);
-                        updateValue(field, draggedValue, highValue, dragged, reasonForDraggedIssue, true);
+                        shiftIssuesUp(jql, highValue, field, user, dragged, reasonForShiftedIssues, timestamp);
+                        updateValue(field, draggedValue, highValue, dragged, reasonForDraggedIssue, timestamp, true);
                     } else {
                         /*
                           Issue is dragged between two issues with initialized values.
                           Shift down in this case.
                         */
                         reasonForShiftedIssues.setReasonType(IssueChangeReason.INSERTED_ABOVE);
-                        shiftIssuesDown(jql, lowValue, field, user, dragged, reasonForShiftedIssues);
-                        updateValue(field, draggedValue, lowValue, dragged, reasonForDraggedIssue, true);
+                        shiftIssuesDown(jql, lowValue, field, user, dragged, reasonForShiftedIssues, timestamp);
+                        updateValue(field, draggedValue, lowValue, dragged, reasonForDraggedIssue, timestamp, true);
                     }
                 } else {
                     /*
@@ -360,13 +366,13 @@ public class DispositionManagerImpl implements DispositionManager {
                         return;
                     }
                     reasonForShiftedIssues.setReasonType(IssueChangeReason.REMOVED_ABOVE);
-                    shiftIssuesUp(jql, highValue, field, user, dragged, reasonForShiftedIssues);
-                    updateValue(field, draggedValue, highValue, dragged, reasonForDraggedIssue, true);
+                    shiftIssuesUp(jql, highValue, field, user, dragged, reasonForShiftedIssues, timestamp);
+                    updateValue(field, draggedValue, highValue, dragged, reasonForDraggedIssue, timestamp, true);
                 }
             }
         } else {
             // we've found average value for dragged issue - no need to shift other issues
-            updateValue(field, draggedValue, (double) average, dragged, reasonForDraggedIssue, true);
+            updateValue(field, draggedValue, (double) average, dragged, reasonForDraggedIssue, timestamp, true);
         }
     }
 
@@ -383,9 +389,9 @@ public class DispositionManagerImpl implements DispositionManager {
         return value;
     }
 
-    public void shiftIssuesDown(@NotNull String jql, @NotNull Double startValue, @NotNull CustomField field, @NotNull User user, @NotNull Issue currentIssue, IssueChangeReason reason) {
+    public void shiftIssuesDown(@NotNull String jql, @NotNull Double startValue, @NotNull CustomField field, @NotNull User user, @NotNull Issue currentIssue, IssueChangeReason reason, DateTime timestamp) {
         try {
-            shiftIssues(jql, startValue, field, user, currentIssue, SHIFT_DOWN, reason);
+            shiftIssues(jql, startValue, field, user, currentIssue, SHIFT_DOWN, reason, timestamp);
         } catch (JqlParseException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
@@ -395,9 +401,9 @@ public class DispositionManagerImpl implements DispositionManager {
         }
     }
 
-    public void shiftIssuesUp(@NotNull String jql, @NotNull Double startValue, @NotNull CustomField field, @NotNull User user, @NotNull Issue currentIssue, IssueChangeReason reason) {
+    public void shiftIssuesUp(@NotNull String jql, @NotNull Double startValue, @NotNull CustomField field, @NotNull User user, @NotNull Issue currentIssue, IssueChangeReason reason, DateTime timestamp) {
         try {
-            shiftIssues(jql, startValue, field, user, currentIssue, SHIFT_UP, reason);
+            shiftIssues(jql, startValue, field, user, currentIssue, SHIFT_UP, reason, timestamp);
         } catch (JqlParseException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
@@ -645,7 +651,7 @@ public class DispositionManagerImpl implements DispositionManager {
      * @throws JqlParseException
      * @throws SearchException
      */
-    private void  shiftIssues(@NotNull String jql, @Nullable Double startValue, @NotNull CustomField field, @NotNull User user, @NotNull Issue currentIssue, int shiftValue, IssueChangeReason reason) throws JqlParseException, SearchException {
+    private void shiftIssues(@NotNull String jql, @Nullable Double startValue, @NotNull CustomField field, @NotNull User user, @NotNull Issue currentIssue, int shiftValue, IssueChangeReason reason, DateTime timestamp) throws JqlParseException, SearchException {
 
         if (startValue == null) {
             return;
@@ -699,7 +705,7 @@ public class DispositionManagerImpl implements DispositionManager {
         for (Issue issue : issues) {
             Double disposition = getIssueValue(issue, field);
             DispositionUtils.setSkipShift(true);
-            updateValue(field, disposition, disposition + shiftValue, issue, reason, true);
+            updateValue(field, disposition, disposition + shiftValue, issue, reason, timestamp, true);
             DispositionUtils.setSkipShift(false);
         }
     }
@@ -730,7 +736,7 @@ public class DispositionManagerImpl implements DispositionManager {
      * @param reason      - issue because of which the change occurred
      * @param reindex     - should the issue be reindexed
      */
-    private void updateValue(@NotNull CustomField customField, @Nullable Double prevValue, @Nullable Double newValue, @NotNull Issue issue, @Nullable IssueChangeReason reason, boolean reindex) {
+    private void updateValue(@NotNull CustomField customField, @Nullable Double prevValue, @Nullable Double newValue, @NotNull Issue issue, @Nullable IssueChangeReason reason, @NotNull DateTime timestamp, boolean reindex) {
         customField.updateValue(null, issue, new ModifiedValue(prevValue, newValue), new DefaultIssueChangeHolder());
         if (reindex) {
             indexIssue(issue);
@@ -743,17 +749,18 @@ public class DispositionManagerImpl implements DispositionManager {
             log.error(String.format(
                     "DISPOSITION. DispositionManagerImpl:731. NOREASON. Issue: %s, prevValue-newValue: %f-%f",
                     issue.getKey(), prevValue, newValue));
-        notificationCenter.createUpdatedValueMessages(getMessageData(customField, prevValue, newValue, issue, reason));
+        notificationCenter.createUpdatedValueMessages(getMessageData(customField, prevValue, newValue, issue, reason, timestamp));
     }
 
-    private IssueChange getMessageData(CustomField customField, Double prevValue, Double newValue, Issue issue, IssueChangeReason reason) {
+    private IssueChange getMessageData(CustomField customField, Double prevValue, Double newValue, Issue issue, IssueChangeReason reason, DateTime timestamp) {
         IssueChange issueChange = new IssueChange();
         issueChange.setQueueName(customField.getName());
         issueChange.setIssue(issue);
         issueChange.setPrevValue(prevValue);
         issueChange.setNewValue(newValue);
+        issueChange.setTimestamp(timestamp);
         if(reason != null)
-            issueChange.setReason(reason);
+            issueChange.addReason(reason);
         return issueChange;
     }
 
