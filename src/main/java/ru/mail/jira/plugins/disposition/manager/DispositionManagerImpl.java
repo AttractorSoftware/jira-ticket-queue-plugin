@@ -215,6 +215,19 @@ public class DispositionManagerImpl implements DispositionManager {
         String jql = replaceCurrentUser(dispositionConfigurationManager.getQuery(field), user.getName());
         assert jql != null;
 
+        final I18nHelper i18n = i18nFactory.getInstance(user);
+
+        Group group = groupManager.getGroup(QUEUE_MANAGER_GROUP_NAME);
+        if (!groupManager.isUserInGroup(user, group)) {
+            String contactList = "";
+            Collection<User> queueManagers = groupManager.getUsersInGroup(group.getName());
+            for(User manager:queueManagers) {
+                contactList += String.format("%s(%s) ", manager.getDisplayName(), manager.getEmailAddress());
+            }
+            errors.add(String.format(i18n.getText("ru.mail.jira.plugins.disposition.manager.error.permission.denied"), contactList));
+            return;
+        }
+
         DateTime timestamp = new DateTime();
 
         IssueChangeReason reason = new IssueChangeReason();
@@ -741,14 +754,14 @@ public class DispositionManagerImpl implements DispositionManager {
         if (reindex) {
             indexIssue(issue);
         }
-        if(reason != null)
-            log.error(String.format(
-                    "DISPOSITION. DispositionManagerImpl:731. Issue: %s, prevValue-newValue: %f-%f, causalIssue: %s, reasonType: %d, user: %s",
-                    issue.getKey(), prevValue, newValue, reason.getCausalIssue().getKey(), reason.getReasonType(), reason.getUserDisplayName()));
-        else
-            log.error(String.format(
-                    "DISPOSITION. DispositionManagerImpl:731. NOREASON. Issue: %s, prevValue-newValue: %f-%f",
-                    issue.getKey(), prevValue, newValue));
+//        if(reason != null)
+//            log.error(String.format(
+//                    "DISPOSITION. DispositionManagerImpl:731. Issue: %s, prevValue-newValue: %f-%f, causalIssue: %s, reasonType: %d, user: %s",
+//                    issue.getKey(), prevValue, newValue, reason.getCausalIssue().getKey(), reason.getReasonType(), reason.getUserDisplayName()));
+//        else
+//            log.error(String.format(
+//                    "DISPOSITION. DispositionManagerImpl:731. NOREASON. Issue: %s, prevValue-newValue: %f-%f",
+//                    issue.getKey(), prevValue, newValue));
         notificationCenter.createUpdatedValueMessages(getMessageData(customField, prevValue, newValue, issue, reason, timestamp));
     }
 

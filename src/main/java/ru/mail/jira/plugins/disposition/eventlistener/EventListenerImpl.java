@@ -20,6 +20,7 @@ import com.atlassian.jira.ofbiz.OfBizDelegator;
 import com.atlassian.jira.web.bean.PagerFilter;
 import com.atlassian.query.order.SortOrder;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import ru.mail.jira.plugins.disposition.manager.DispositionConfigurationManager;
@@ -115,7 +116,8 @@ public class EventListenerImpl extends AbstractIssueEventListener implements Ini
         IssueChangeReason reason = new IssueChangeReason();
         reason.setCausalIssue(issue);
         reason.setReasonType(IssueChangeReason.ISSUE_RESOLVED);
-        dispositionManager.shiftIssuesUp(query, (Double) lastIssue.getCustomFieldValue(customField), customField, issue.getAssigneeUser(), issue, reason);
+        DateTime timestamp = new DateTime();
+        dispositionManager.shiftIssuesUp(query, (Double) lastIssue.getCustomFieldValue(customField), customField, issue.getAssigneeUser(), issue, reason, timestamp);
     }
 
     private Issue getLastIssue(Issue issue, CustomField customField) {

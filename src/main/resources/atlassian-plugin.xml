@@ -90,39 +90,39 @@
 
 
     <!-- Web stuff for changing issue disposition -->
-    <!--<web-item key="change-issue-disposition"-->
-              <!--name="Change disposition of issue"-->
-              <!--section="operations-work" weight="1">-->
+    <web-item key="change-issue-disposition"
+              name="Change disposition of issue"
+              section="operations-work" weight="1">
 
-        <!--<label key="ru.mail.jira.plugins.disposition.web.item.change.label"/>-->
-        <!--<tooltip key="ru.mail.jira.plugins.disposition.web.item.change.tooltip"/>-->
-        <!--<styleClass>issueaction-disposition-issue</styleClass>-->
+        <label key="ru.mail.jira.plugins.disposition.web.item.change.label"/>
+        <tooltip key="ru.mail.jira.plugins.disposition.web.item.change.tooltip"/>
+        <styleClass>issueaction-disposition-issue</styleClass>
 
-        <!--<link linkId="disposition-issue"> &lt;!&ndash; link value, id will be needed later on &ndash;&gt;-->
-            <!--/secure/ChangeIssueDispositionAction!default.jspa?#if(${issue})id=${issue.id}#end-->
-        <!--</link>-->
+        <link linkId="disposition-issue"> <!-- link value, id will be needed later on -->
+            /secure/ChangeIssueDispositionAction!default.jspa?#if(${issue})id=${issue.id}#end
+        </link>
 
-        <!--<condition class="com.atlassian.jira.plugin.webfragment.conditions.UserLoggedInCondition"/>-->
-        <!--<condition class="com.atlassian.jira.plugin.webfragment.conditions.IsIssueEditableCondition"/>-->
-    <!--</web-item>-->
+        <condition class="com.atlassian.jira.plugin.webfragment.conditions.UserLoggedInCondition"/>
+        <condition class="com.atlassian.jira.plugin.webfragment.conditions.IsIssueEditableCondition"/>
+    </web-item>
 
-    <!--<webwork1 key="change-issue-disposition-action" name="Change issue disposition Action" class="java.lang.Object">-->
-        <!--<actions>-->
-            <!--<action name="ru.mail.jira.plugins.disposition.web.action.ChangeIssueDispositionAction"-->
-                    <!--alias="ChangeIssueDispositionAction">-->
-                <!--<view name="input">/ru/mail/jira/plugins/disposition/templates/change/input.vm</view>-->
-                <!--<view name="error">/ru/mail/jira/plugins/disposition/templates/change/input.vm</view>-->
-            <!--</action>-->
-        <!--</actions>-->
-    <!--</webwork1>-->
+    <webwork1 key="change-issue-disposition-action" name="Change issue disposition Action" class="java.lang.Object">
+        <actions>
+            <action name="ru.mail.jira.plugins.disposition.web.action.ChangeIssueDispositionAction"
+                    alias="ChangeIssueDispositionAction">
+                <view name="input">/ru/mail/jira/plugins/disposition/templates/change/input.vm</view>
+                <view name="error">/ru/mail/jira/plugins/disposition/templates/change/input.vm</view>
+            </action>
+        </actions>
+    </webwork1>
 
-    <!--<web-resource key="init-disposition-change-dialog" name="init-disposition-change-dialog">-->
-        <!--<transformation extension="js">-->
-            <!--<transformer key="jsI18n"/>-->
-        <!--</transformation>-->
-        <!--<context>atl.general</context>-->
-        <!--<resource type="download" name="initChangeDialog.js" location="/ru/mail/jira/plugins/disposition/scripts/initChangeDialog.js"/>-->
-    <!--</web-resource>-->
+    <web-resource key="init-disposition-change-dialog" name="init-disposition-change-dialog">
+        <transformation extension="js">
+            <transformer key="jsI18n"/>
+        </transformation>
+        <context>atl.general</context>
+        <resource type="download" name="initChangeDialog.js" location="/ru/mail/jira/plugins/disposition/scripts/initChangeDialog.js"/>
+    </web-resource>
 
 
     <!-- Javascript Web Resources for Issue Disposition -->
