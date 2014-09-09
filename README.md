@@ -14,11 +14,11 @@ jira-ticket-queue-plugin
 
 * Скачиваем дистрибутив Atlassian SDK
 
-`wget https://maven.atlassian.com/content/repositories/atlassian-public/com/atlassian/amps/atlassian-plugin-sdk/3.4/atlassian-plugin-sdk-3.4.zip`
+`wget https://maven.atlassian.com/content/repositories/atlassian-public/com/atlassian/amps/atlassian-plugin-sdk/4.2.20/atlassian-plugin-sdk-4.2.20.tar.gz`
 
 * Распаковываем его в директорию /opt
 
-`sudo unzip atlassian-plugin-sdk-3.4.zip -d /opt`
+`sudo tar -xzf atlassian-plugin-sdk-4.2.20.tar.gz -C /opt`
 
 * Добавляем в переменную среды
 
