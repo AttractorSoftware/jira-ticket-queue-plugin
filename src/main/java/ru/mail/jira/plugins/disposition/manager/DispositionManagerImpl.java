@@ -229,14 +229,33 @@ public class DispositionManagerImpl implements DispositionManager {
         }
 
         DateTime timestamp = new DateTime();
+        //TODO: Сделать возможность менять положение в разных очередях
+        IssueChangeReason reasonForDraggedIssue = new IssueChangeReason();
+        IssueChangeReason reasonForShiftedIssues = new IssueChangeReason();
 
-        IssueChangeReason reason = new IssueChangeReason();
-        reason.setReasonType(IssueChangeReason.MANUALY_CHANED);
-        reason.setUser(user);
+        reasonForDraggedIssue.setReasonType(IssueChangeReason.MANUALY_CHANED);
+        reasonForDraggedIssue.setUser(user);
+
+        reasonForShiftedIssues.setCausalIssue(issue);
+        reasonForShiftedIssues.setUser(user);
+
 
         Double prevValue = getIssueValue(issue, field);
         // set value of our issue
-        updateValue(field, prevValue, value, issue, reason, timestamp, true);
+
+        if(value > prevValue) {
+            Double highValue = value;
+            reasonForShiftedIssues.setReasonType(IssueChangeReason.REMOVED_ABOVE);
+            shiftIssuesUp(jql, highValue, field, user, issue, reasonForShiftedIssues, timestamp);
+            updateValue(field, prevValue, value, issue, reasonForDraggedIssue, timestamp, true);
+        }
+        else if (value < prevValue) {
+            Double lowValue = value + DISPOSITION_STEP;
+            reasonForShiftedIssues.setReasonType(IssueChangeReason.INSERTED_ABOVE);
+            shiftIssuesDown(jql, lowValue, field, user, issue, reasonForShiftedIssues, timestamp);
+            updateValue(field, prevValue, value, issue, reasonForDraggedIssue, timestamp, true);
+        }
+
     }
 
     @Override
