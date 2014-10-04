@@ -242,11 +242,14 @@ public class DispositionManagerImpl implements DispositionManager {
 
         Double prevValue = getIssueValue(issue, field);
         // set value of our issue
-
-        if(value > prevValue) {
-            Double highValue = value;
+        if(prevValue == null) {
+            reasonForShiftedIssues.setReasonType(IssueChangeReason.INSERTED_ABOVE);
+            shiftIssuesDown(jql, value, field, user, issue, reasonForShiftedIssues, timestamp);
+            updateValue(field, prevValue, value, issue, reasonForDraggedIssue, timestamp, true);
+        }
+        else if(value > prevValue) {
             reasonForShiftedIssues.setReasonType(IssueChangeReason.REMOVED_ABOVE);
-            shiftIssuesUp(jql, highValue, field, user, issue, reasonForShiftedIssues, timestamp);
+            shiftIssuesUp(jql, value, field, user, issue, reasonForShiftedIssues, timestamp);
             updateValue(field, prevValue, value, issue, reasonForDraggedIssue, timestamp, true);
         }
         else if (value < prevValue) {
