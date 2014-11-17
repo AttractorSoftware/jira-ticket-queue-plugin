@@ -82,15 +82,15 @@ public class IssueDispositionCF extends NumberCFType {
         }
     }
 
-    @Override
-    public Double getValueFromIssue(@Nullable CustomField field, @Nullable Issue issue) {
-        Double value = super.getValueFromIssue(field, issue);
-        if (null == field || null == issue) {
-            return null;
-        }
-        if (null == value) {
-            return getDefaultValue(field.getRelevantConfig(issue));
-        }
-        return value;
-    }
+//    @Override
+//    public Double getValueFromIssue(@Nullable CustomField field, @Nullable Issue issue) {
+//        Double value = super.getValueFromIssue(field, issue);
+//        if (null == field || null == issue) {
+//            return null;
+//        }
+//        if (null == value) {
+//            return getDefaultValue(field.getRelevantConfig(issue));
+//        }
+//        return value;
+//    }
 }
